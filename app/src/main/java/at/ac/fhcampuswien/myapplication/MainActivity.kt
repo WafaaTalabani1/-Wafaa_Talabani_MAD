@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.myapplication
 
+import android.graphics.Paint.Align
 import android.os.Bundle
 import android.service.autofill.OnClickAction
 import androidx.activity.ComponentActivity
@@ -24,12 +25,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,7 +70,7 @@ class MainActivity : ComponentActivity() {
                         DropdownMenu(
                             expanded = dropDownMenuExpanded,
                             onDismissRequest = { dropDownMenuExpanded = false },
-                            modifier = Modifier.fillMaxWidth()
+
                         ) {
                             DropdownMenuItem(onClick = { /*TODO*/ }) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -100,8 +104,8 @@ fun MovieRow(movie: Movie = getMovies()[0]) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp),
-        shape = RoundedCornerShape(corner = CornerSize(15.dp)),
-        elevation = 5.dp
+             shape = RoundedCornerShape(corner = CornerSize(15.dp)),
+             elevation = 5.dp
     ) {
 
         Column(
@@ -109,32 +113,42 @@ fun MovieRow(movie: Movie = getMovies()[0]) {
         ) {
 
             Box(
-                contentAlignment = Alignment.TopEnd,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(movie.images[2]),
                     modifier = Modifier
-                        .requiredSize(400.dp, 220.dp)
-                        .fillMaxSize(),
-                    contentDescription = null
+                        .fillMaxWidth(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
                 )
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "Add to Favorite",
-                    modifier = Modifier.padding(20.dp),
-                    tint = Color.White
-                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "Add to Favorite",
+                        tint = Color.White
+                    )
+                }
             }
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
             ) {
                 Text(
-                    text = movie.title, fontSize = 15.sp,
-                    fontFamily = FontFamily.Cursive,
-                    fontWeight = FontWeight(10),
-                    modifier = Modifier.padding(20.dp)
+                    text = movie.title,
+                    style=MaterialTheme.typography.h6,
+                    fontFamily = FontFamily.SansSerif,
+                    modifier = Modifier.padding(5.dp)
                 )
                 Icon(imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = "keyboardArrowUp",
@@ -145,20 +159,22 @@ fun MovieRow(movie: Movie = getMovies()[0]) {
                 enter = slideInVertically { -it },
                 exit = slideOutVertically { +it },
                 modifier = Modifier.padding(10.dp)) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Director: ${movie.director}", modifier = Modifier.fillMaxWidth())
-                    Text(text = "Released: ${movie.year}", modifier = Modifier.fillMaxWidth())
-                    Text(text = "Genre: ${movie.genre}", modifier = Modifier.fillMaxWidth())
-                    Text(text = "Actors: ${movie.actors}", modifier = Modifier.fillMaxWidth())
-                    Text(text = "Rating: ${movie.rating}", modifier = Modifier.fillMaxWidth())
-                    Text(
-                        text = "------------------------------------",
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(text = "Plot: ${movie.plot}", modifier = Modifier.fillMaxWidth())
+
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Column (){
+                            Text(text = "Director: ${movie.director}")
+                            Text(text = "Released: ${movie.year}")
+                            Text(text = "Genre: ${movie.genre}")
+                            Text(text = "Actors: ${movie.actors}")
+                            Text(text = "Rating: ${movie.rating}")
+
+                        }
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(text = "Plot: ${movie.plot}", textAlign = TextAlign.Start)
+                        }
+                    }
                 }
 
-            }
         }
 
     }
