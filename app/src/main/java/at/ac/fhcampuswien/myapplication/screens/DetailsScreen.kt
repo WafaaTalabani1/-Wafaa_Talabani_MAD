@@ -29,34 +29,25 @@ import at.ac.fhcampuswien.movieapp.models.Movie
 import at.ac.fhcampuswien.movieapp.models.getMovies
 import at.ac.fhcampuswien.myapplication.MovieRow
 import at.ac.fhcampuswien.myapplication.MyNavigation
+import at.ac.fhcampuswien.myapplication.SimpleAppBar
 import coil.compose.rememberAsyncImagePainter
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun DetailScreen(navController: NavController, movie : Movie ) {
    Column {
-      TopAppBar(
-         title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-               IconButton(onClick = {
-                  navController.popBackStack()
-               }) {
-                  Icon(imageVector = Icons.Default.ArrowBack, "")
-               }
-               Text(text = "${movie.title}")
-            }
-         },
-         backgroundColor = Color.Blue,
-         contentColor = Color.White,
-         elevation = 15.dp,
-      )
+      SimpleAppBar(title = movie.title) {
+         navController.popBackStack()
+      }
+
       MovieRow(movie = movie)
       Column( verticalArrangement = Arrangement.Center) {
          Text(text = "Movie Images" , color = Color.Black,
             fontSize = 30.sp,
-            modifier = Modifier.padding(10.dp)
-                               .fillMaxWidth()
-                              .wrapContentSize())
+            modifier = Modifier
+               .padding(10.dp)
+               .fillMaxWidth()
+               .wrapContentSize())
 
       }
       LazyRow{

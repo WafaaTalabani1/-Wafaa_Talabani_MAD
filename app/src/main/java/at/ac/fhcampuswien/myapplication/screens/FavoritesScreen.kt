@@ -16,11 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import at.ac.fhcampuswien.movieapp.models.Movie
-import at.ac.fhcampuswien.movieapp.models.getMovies
 import at.ac.fhcampuswien.myapplication.MovieRow
+import at.ac.fhcampuswien.myapplication.SimpleAppBar
 
 @Composable
-fun FavoritScreen(navController : NavController){
+fun FavoritesScreen(navController : NavController){
     val favoritsMovies = listOf(
         Movie(id = "tt0416449",
             title = "300",
@@ -64,21 +64,9 @@ fun FavoritScreen(navController : NavController){
             rating = "8.2")
         )
     Column {
-        TopAppBar(
-            title = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, "")
-                    }
-                    Text(text = "Favorit")
-                }
-            },
-            backgroundColor = Color.Blue,
-            contentColor = Color.White,
-            elevation = 15.dp,
-        )
+        SimpleAppBar(title = "Favorites") {
+            navController.popBackStack()
+        }
         LazyColumn{
             items(favoritsMovies){
                 movie -> MovieRow(movie = movie)

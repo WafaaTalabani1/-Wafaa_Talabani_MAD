@@ -186,3 +186,19 @@ fun MovieList(navController: NavController, movies: List<Movie> = getMovies()) {
         }
     }
 }
+
+@Composable
+fun SimpleAppBar(
+    title: String,
+    onBackPressed: () -> Unit
+) {
+    TopAppBar(
+        navigationIcon = {
+            IconButton(onClick = { onBackPressed() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            }
+        },
+        title = { Text(title) }
+    )
+}
+
