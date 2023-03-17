@@ -35,6 +35,9 @@ fun HomeScreen(navController: NavController) {
     var dropDownMenuExpanded by remember {
         mutableStateOf(false)
     }
+    var expanded by remember {
+        mutableStateOf(false)
+    }
 
     Column {
         TopAppBar(
@@ -52,10 +55,10 @@ fun HomeScreen(navController: NavController) {
                 }
                 DropdownMenu(
                     expanded = dropDownMenuExpanded,
-                    onDismissRequest = { dropDownMenuExpanded = false },
-
-                    ) {
-                    DropdownMenuItem(onClick = { /*TODO*/ }) {
+                    onDismissRequest = { dropDownMenuExpanded = false }
+                ) {
+                    DropdownMenuItem(onClick = { navController.navigate("favorites")
+                                               expanded = false }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Favorite,
@@ -85,7 +88,8 @@ fun HomeScreen(navController: NavController) {
 
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp).clickable { onItemClick(movie.id) }
+                .padding(5.dp)
+                .clickable { onItemClick(movie.id) }
                 ,
             shape = RoundedCornerShape(corner = CornerSize(15.dp)),
             elevation = 5.dp
@@ -98,7 +102,8 @@ fun HomeScreen(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp).clickable { onItemClick(movie.id) }
+                        .height(200.dp)
+                        .clickable { onItemClick(movie.id) }
                 ) {
                     Image(
                         painter = rememberAsyncImagePainter(movie.images[2]),

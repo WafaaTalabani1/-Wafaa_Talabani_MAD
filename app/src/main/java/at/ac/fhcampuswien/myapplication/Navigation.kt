@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import at.ac.fhcampuswien.movieapp.models.Movie
 import at.ac.fhcampuswien.movieapp.models.getMovies
 import at.ac.fhcampuswien.myapplication.screens.DetailScreen
+import at.ac.fhcampuswien.myapplication.screens.FavoritScreen
 
 @Composable
 /*
@@ -47,5 +48,6 @@ fun MyNavigation(){
             val movie = getMovies().find { it.id == movieId } ?: getMovies()[0]
             DetailScreen(navController, movie = movie)
         }
+        composable("favorites"){ FavoritScreen(navController = navController)}
     }
 }
