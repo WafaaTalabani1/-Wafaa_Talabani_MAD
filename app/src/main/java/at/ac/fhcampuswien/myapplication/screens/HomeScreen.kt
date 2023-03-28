@@ -1,7 +1,5 @@
 package at.ac.fhcampuswien.myapplication
 
-import android.service.autofill.OnClickAction
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -23,15 +21,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import at.ac.fhcampuswien.movieapp.models.Movie
-import at.ac.fhcampuswien.movieapp.models.getMovies
-import at.ac.fhcampuswien.myapplication.screens.DetailScreen
+import at.ac.fhcampuswien.myapplication.models.MovieViewModel
 import coil.compose.rememberAsyncImagePainter
 
+
+
+
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController = rememberNavController(), viewModel: MovieViewModel) {
     var dropDownMenuExpanded by remember {
         mutableStateOf(false)
     }
@@ -70,17 +71,40 @@ fun HomeScreen(navController: NavController) {
                         }
 
                     }
+                    DropdownMenuItem(onClick = { navController.navigate("addMovie")
+                        expanded = false }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = Color.Red
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Add Movie")
+                        }
+
+                    }
                 }
             }
         )
-        MovieList(navController)
+
+        MovieList(
+            navController = navController,
+            movies = viewModel.movies,
+            onFavClick = { movieId -> viewModel.toggleFavorite(movieId) }
+        )
     }
 
 }
 
     @Composable
-    fun MovieRow(movie: Movie = getMovies()[0], onItemClick : (String)  -> Unit
-    = {}) {
+    fun MovieRow(
+        movie: Movie,
+        onFavClick: (String) -> Unit,
+        onItemClick: (String)  -> Unit
+    ) {
+        val isFavorite = remember { mutableStateOf(movie.isFavorite) }
+        val viewModel: MovieViewModel = viewModel()
         var expanded by remember {
             mutableStateOf(false)
         }
@@ -119,11 +143,17 @@ fun HomeScreen(navController: NavController) {
                             .padding(10.dp),
                         contentAlignment = Alignment.TopEnd
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = "Add to Favorite",
-                            tint = Color.White
-                        )
+                        IconButton(onClick = {
+                            isFavorite.value = !isFavorite.value
+                            viewModel.toggleFavorite( movie.id )
+                            onFavClick(movie.id)
+                        }) {
+                            Icon(
+                                imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Add to Favorite",
+                                tint = if (isFavorite.value) Color.Red else Color.White
+                            )
+                        }
                     }
                 }
                 Row(
@@ -151,7 +181,7 @@ fun HomeScreen(navController: NavController) {
                 ) {
 
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Column() {
+                        Column {
                             Text(text = "Director: ${movie.director}")
                             Text(text = "Released: ${movie.year}")
                             Text(text = "Genre: ${movie.genre}")
@@ -172,7 +202,7 @@ fun HomeScreen(navController: NavController) {
 
 
 @Composable
-fun MovieList(navController: NavController, movies: List<Movie> = getMovies()) {
+fun MovieList(navController: NavController, movies: List<Movie>,onFavClick: (String) -> Unit ) {
     LazyColumn {
         items(movies) { movie ->
             MovieRow(
@@ -181,9 +211,10 @@ fun MovieList(navController: NavController, movies: List<Movie> = getMovies()) {
                     navController.navigate("detailsScreen/${movieId}"){
                         popUpTo("home")
                     }
-                }
+                }, onFavClick = onFavClick
             )
         }
+
     }
 }
 
@@ -201,4 +232,5 @@ fun SimpleAppBar(
         title = { Text(title) }
     )
 }
+
 

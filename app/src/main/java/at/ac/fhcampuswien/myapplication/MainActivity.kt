@@ -3,8 +3,10 @@ package at.ac.fhcampuswien.myapplication
 import android.graphics.Paint.Align
 import android.os.Bundle
 import android.service.autofill.OnClickAction
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -37,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import at.ac.fhcampuswien.movieapp.models.Movie
 import at.ac.fhcampuswien.movieapp.models.getMovies
+import at.ac.fhcampuswien.myapplication.models.MovieViewModel
 import at.ac.fhcampuswien.myapplication.ui.theme.MyApplicationTheme
 
 import coil.compose.rememberAsyncImagePainter
@@ -44,11 +47,53 @@ import coil.compose.rememberAsyncImagePainter
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        /*
+        Initialize and access ViewModel inside Activities (outside of composable scope)
+         */
+        val viewModel : MovieViewModel by viewModels()
+        viewModel.movies
         setContent {
             MyNavigation()
         }
     }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.i("MainActivity", "i am in onRestart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("MainActivity", "i am in onResume")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i("MainActivity", "i am in onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.i("MainActivity", "i am in onStop")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i("MainActivity", "i am in onDestroy")
+    }
+
+    override fun onStart(){
+        super.onStart()
+        Log.i("MainActivity", "i am in onStart")
+    }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        Log.d("MyActivity", "onBackPressed")
+    }
+
+
 }
+
 
 
 @Composable
