@@ -15,6 +15,7 @@ import at.ac.fhcampuswien.myapplication.screens.FavoritesScreen
 
 @Composable
 fun MyNavigation(){
+
     val viewModel: MovieViewModel = viewModel()
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = HomeScreen.route){
