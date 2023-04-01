@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +25,8 @@ import java.util.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.sp
 import org.json.JSONObject.NULL
 
 
@@ -44,6 +47,12 @@ fun AddMovieScreen(navController: NavController, viewModel: MovieViewModel){
     }
 }
 
+fun isValidTextInput(input: String): Boolean {
+    return input.all { it.isLetter() || it.isWhitespace() }
+}
+fun isValidNumberInput(input: String): Boolean {
+    return input.all { it.isDigit() }
+}
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainContent(modifier: Modifier = Modifier,navController: NavController, viewModel: MovieViewModel ) {
@@ -99,8 +108,18 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 mutableStateOf("")
             }
 
-            var isEnabledSaveButton by remember {
-                mutableStateOf(true)
+            val isValidTitle by remember { derivedStateOf { title.isNotBlank() && isValidTextInput(title) } }
+            val isValidYear by remember { derivedStateOf { year.isNotBlank() && isValidNumberInput(year) } }
+            val isValidDirector by remember { derivedStateOf { director.isNotBlank() && isValidTextInput(title)} }
+            val isValidActors by remember { derivedStateOf { actors.isNotBlank() && isValidTextInput(title)} }
+            val isValidRating by remember { derivedStateOf { rating.isNotBlank() && rating.toFloatOrNull() != null } }
+            val hasSelectedGenres by remember { derivedStateOf { genreItems.any { it.isSelected } } }
+            val isValidPlot by remember { derivedStateOf { plot.isNotBlank()&& isValidTextInput(title) } }
+            val isEnabledSaveButton by remember {
+                derivedStateOf {
+                    isValidTitle && isValidYear && isValidDirector &&
+                            isValidActors && isValidRating && hasSelectedGenres
+                }
             }
 
             OutlinedTextField(
@@ -109,8 +128,18 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = { title = it },
                 label = { Text(text = stringResource(R.string.enter_movie_title)) },
-                isError = false
+                isError = !isValidTitle && title.isNotEmpty()
             )
+
+            if (!isValidTitle && title.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp),
+                    text = stringResource(R.string.error_invalid_title),
+                    color = MaterialTheme.colors.error,
+                    fontSize = 12.sp
+                )
+            }
+
 
             OutlinedTextField(
                 value = year,
@@ -118,8 +147,19 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = { year = it },
                 label = { Text(stringResource(R.string.enter_movie_year)) },
-                isError = false
+                isError = !isValidYear && year.isNotEmpty() ,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+
+            if (!isValidYear && year.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp),
+                    text = stringResource(R.string.error_invalid_year),
+                    color = MaterialTheme.colors.error,
+                    fontSize = 12.sp
+                )
+            }
+
 
             Text(
                 modifier = Modifier.padding(top = 4.dp),
@@ -154,6 +194,14 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                     }
                 }
             }
+            if (!hasSelectedGenres && genreItems.any { it.isSelected }) {
+            Text(
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                text = stringResource(R.string.error_no_genres_selected),
+                color = MaterialTheme.colors.error,
+                fontSize = 12.sp
+            )
+        }
 
             OutlinedTextField(
                 value = director,
@@ -161,16 +209,35 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = { director = it },
                 label = { Text(stringResource(R.string.enter_director)) },
-                isError = false
+                isError = !isValidDirector && director.isNotEmpty()
             )
+
+            if (!isValidDirector && director.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                    text = stringResource(R.string.error_invalid_director),
+                    color = MaterialTheme.colors.error,
+                    fontSize = 12.sp
+                )
+            }
 
             OutlinedTextField(
                 value = actors,
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = { actors = it },
                 label = { Text(stringResource(R.string.enter_actors)) },
-                isError = false
+                isError = !isValidActors && actors.isNotEmpty()
             )
+
+            if (!isValidActors && actors.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                    text = stringResource(R.string.error_invalid_actors),
+                    color = MaterialTheme.colors.error,
+                    fontSize = 12.sp
+                )
+            }
+
 
             OutlinedTextField(
                 value = plot,
@@ -180,8 +247,17 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                     .height(120.dp),
                 onValueChange = { plot = it },
                 label = { Text(textAlign = TextAlign.Start, text = stringResource(R.string.enter_plot)) },
-                isError = false
+                isError = !isValidPlot && plot.isNotEmpty()
             )
+
+            if (!isValidPlot && plot.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                    text = stringResource(R.string.error_invalid_plot),
+                    color = MaterialTheme.colors.error,
+                    fontSize = 12.sp
+                )
+            }
 
             OutlinedTextField(
                 value = rating,
@@ -193,9 +269,17 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                     }
                 },
                 label = { Text(stringResource(R.string.enter_rating)) },
-                isError = false
+                isError = !isValidRating && rating.isNotEmpty()
             )
 
+            if (!isValidRating && rating.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                    text = stringResource(R.string.error_invalid_rating),
+                    color = MaterialTheme.colors.error,
+                    fontSize = 12.sp
+                )
+            }
 
             Button(
                 enabled = isEnabledSaveButton,
@@ -209,7 +293,7 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                         director = director,
                         actors = actors,
                         plot = plot,
-                        images = listOf("https://images-na.ssl-images-amazon.com/images/M/MV5BMTk2MDMzMTc0MF5BMl5BanBnXkFtZTgwMTAyMzA1OTE@._V1_SX1500_CR0,0,1500,999_AL_.jpg","https://images-na.ssl-images-amazon.com/images/M/MV5BMTk2MDMzMTc0MF5BMl5BanBnXkFtZTgwMTAyMzA1OTE@._V1_SX1500_CR0,0,1500,999_AL_.jpg","https://images-na.ssl-images-amazon.com/images/M/MV5BMTk2MDMzMTc0MF5BMl5BanBnXkFtZTgwMTAyMzA1OTE@._V1_SX1500_CR0,0,1500,999_AL_.jpg","https://images-na.ssl-images-amazon.com/images/M/MV5BMTk2MDMzMTc0MF5BMl5BanBnXkFtZTgwMTAyMzA1OTE@._V1_SX1500_CR0,0,1500,999_AL_.jpg"),
+                        images = listOf("","",""),
                         rating = rating.toFloat(),
                         isFavorite = false // Set the initial favorite status to false
                     )
@@ -222,3 +306,18 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
 
         }}
 }
+
+
+
+    fun addMovie(
+        title: String,
+        year: String,
+        genres: List<Genre>,
+        director: String,
+        actors: String,
+        plot: String,
+        rating: Float
+    ) {
+        // Implement the logic to add a movie to the collection
+    }
+

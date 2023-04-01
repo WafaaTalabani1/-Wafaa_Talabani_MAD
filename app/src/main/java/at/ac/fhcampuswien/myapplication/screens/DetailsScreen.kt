@@ -12,39 +12,46 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import at.ac.fhcampuswien.movieapp.models.Movie
 import at.ac.fhcampuswien.myapplication.MovieRow
 import at.ac.fhcampuswien.myapplication.SimpleAppBar
+import at.ac.fhcampuswien.myapplication.models.MovieViewModel
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun DetailScreen(navController: NavController, movie: Movie, onFavClick: Unit) {
+fun DetailScreen(navController: NavController, movie: Movie, viewModel: MovieViewModel) {
     Column {
         SimpleAppBar(title = movie.title) {
             navController.popBackStack()
         }
 
-        MovieRow(movie = movie, onFavClick = { onFavClick }, onItemClick = {})
+        MovieRow(
+            movie = movie,
+            onFavClick = { movieId ->
+                viewModel.toggleFavorite(movieId)
+            },
+            onItemClick = {}
+        )
         Column(verticalArrangement = Arrangement.Center) {
             Text(
                 text = "Movie Images", color = Color.Black,
                 fontSize = 30.sp,
                 modifier = Modifier
-                   .padding(10.dp)
-                   .fillMaxWidth()
-                   .wrapContentSize()
+                    .padding(10.dp)
+                    .fillMaxWidth()
+                    .wrapContentSize()
             )
-
         }
         LazyRow {
             items(movie.images.size) {
                 Card(
                     shape = RoundedCornerShape(corner = CornerSize(10.dp)),
                     modifier = Modifier
-                       .width(350.dp)
-                       .height(400.dp)
-                       .padding(10.dp),
+                        .width(350.dp)
+                        .height(400.dp)
+                        .padding(10.dp),
                     elevation = 7.dp
                 ) {
                     Image(
@@ -56,6 +63,5 @@ fun DetailScreen(navController: NavController, movie: Movie, onFavClick: Unit) {
                 }
             }
         }
-
     }
 }

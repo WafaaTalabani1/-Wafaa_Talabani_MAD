@@ -10,4 +10,14 @@
     <string name="enter_rating">Enter a rating</string>
     <string name="select_genres">Select Genres</string>
     <string name="add">Add</string>
+    <string name="error_invalid_title">Please enter a valid movie title.</string>
+    <string name="error_invalid_year">Please enter a valid year.</string>
+    <string name="error_no_genres_selected">Please select at least one genre.</string>
+    <string name="error_invalid_director">Please enter a valid director.</string>
+    <string name="error_invalid_actors">Please enter valid actors.</string>
+    <string name="error_invalid_plot">Please enter a valid plot.</string>
+    <string name="error_invalid_rating">Please enter a valid rating.</string>
+
+
+
 </resources>

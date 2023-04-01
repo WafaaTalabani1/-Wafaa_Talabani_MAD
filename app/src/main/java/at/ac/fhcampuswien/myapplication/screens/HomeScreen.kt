@@ -1,10 +1,12 @@
 package at.ac.fhcampuswien.myapplication
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +14,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -97,108 +100,108 @@ fun HomeScreen(navController: NavController = rememberNavController(), viewModel
 
 }
 
-    @Composable
-    fun MovieRow(
-        movie: Movie,
-        onFavClick: (String) -> Unit,
-        onItemClick: (String)  -> Unit
+@Composable
+fun MovieRow(
+    movie: Movie,
+    onFavClick: (String) -> Unit,
+    onItemClick: (String) -> Unit
+) {
+    val isFavorite = remember { mutableStateOf(movie.isFavorite) }
+    val viewModel: MovieViewModel = viewModel()
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .clickable { onItemClick(movie.id) },
+        shape = RoundedCornerShape(corner = CornerSize(15.dp)),
+        elevation = 5.dp
     ) {
-        val isFavorite = remember { mutableStateOf(movie.isFavorite) }
-        val viewModel: MovieViewModel = viewModel()
-        var expanded by remember {
-            mutableStateOf(false)
-        }
-        Card(
 
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp)
-                .clickable { onItemClick(movie.id) }
-                ,
-            shape = RoundedCornerShape(corner = CornerSize(15.dp)),
-            elevation = 5.dp
+        Column(
+            modifier = Modifier.fillMaxWidth(),
         ) {
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
             ) {
+                Image(
+                    painter = rememberAsyncImagePainter(movie.images[2]),
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
-                        .clickable { onItemClick(movie.id) }
+                        .padding(10.dp),
+                    contentAlignment = Alignment.TopEnd
                 ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(movie.images[2]),
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
+                    IconButton(onClick = {
+                        isFavorite.value = !isFavorite.value
+                        viewModel.toggleFavorite( movie.id )
+                        onFavClick(movie.id)
+                    }) {
+                        Icon(
+                            imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Add to Favorite",
+                            tint = if (isFavorite.value) Color.Red else Color.Blue
+                        )
+                    }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                        contentAlignment = Alignment.TopEnd
-                    ) {
-                        IconButton(onClick = {
-                            isFavorite.value = !isFavorite.value
-                            viewModel.toggleFavorite( movie.id )
-                            onFavClick(movie.id)
-                        }) {
-                            Icon(
-                                imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = "Add to Favorite",
-                                tint = if (isFavorite.value) Color.Red else Color.White
-                            )
-                        }
+                }
+            }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+            ) {
+                Text(
+                    text = movie.title,
+                    style = MaterialTheme.typography.h6,
+                    fontFamily = FontFamily.SansSerif,
+                    modifier = Modifier.padding(5.dp)
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = "keyboardArrowUp",
+                    modifier = Modifier.clickable { expanded = !expanded }
+                )
+            }
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = slideInVertically { -it },
+                exit = slideOutVertically { +it },
+                modifier = Modifier.padding(10.dp)
+            ) {
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Column {
+                        Text(text = "Director: ${movie.director}")
+                        Text(text = "Released: ${movie.year}")
+                        Text(text = "Genre: ${movie.genre}")
+                        Text(text = "Actors: ${movie.actors}")
+                        Text(text = "Rating: ${movie.rating}")
+
+                    }
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(text = "Plot: ${movie.plot}", textAlign = TextAlign.Start)
                     }
                 }
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                ) {
-                    Text(
-                        text = movie.title,
-                        style = MaterialTheme.typography.h6,
-                        fontFamily = FontFamily.SansSerif,
-                        modifier = Modifier.padding(5.dp)
-                    )
-                    Icon(imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = "keyboardArrowUp",
-                        modifier = Modifier.clickable { expanded = !expanded })
-                }
-
-                AnimatedVisibility(
-                    visible = expanded,
-                    enter = slideInVertically { -it },
-                    exit = slideOutVertically { +it },
-                    modifier = Modifier.padding(10.dp)
-                ) {
-
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Column {
-                            Text(text = "Director: ${movie.director}")
-                            Text(text = "Released: ${movie.year}")
-                            Text(text = "Genre: ${movie.genre}")
-                            Text(text = "Actors: ${movie.actors}")
-                            Text(text = "Rating: ${movie.rating}")
-
-                        }
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            Text(text = "Plot: ${movie.plot}", textAlign = TextAlign.Start)
-                        }
-                    }
-                }
-
             }
 
         }
+
     }
+}
 
 
 @Composable

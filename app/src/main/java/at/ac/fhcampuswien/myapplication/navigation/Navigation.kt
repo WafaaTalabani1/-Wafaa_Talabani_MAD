@@ -20,15 +20,19 @@ fun MyNavigation(){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = HomeScreen.route){
         composable(HomeScreen.route) { HomeScreen(navController,viewModel)}
-        composable(DetailsScreen.route.plus("/{movieId}"),
-            arguments = listOf(navArgument("movieId"){
+        composable(
+            DetailsScreen.route.plus("/{movieId}"),
+            arguments = listOf(navArgument("movieId") {
                 type = NavType.StringType
             })
         ) { backStackEntry ->
             val movieId = backStackEntry.arguments?.getString("movieId") ?: ""
             val movie = getMovies().find { it.id == movieId } ?: getMovies()[0]
-            DetailScreen(navController, movie = movie ,  viewModel.toggleFavorite(movieId))
+            val viewModel: MovieViewModel = viewModel()
+            DetailScreen(navController, movie = movie, viewModel = viewModel)
         }
+
+
         composable(FavoritesScreen.route){ FavoritesScreen(navController = navController,viewModel)}
         composable(AddMovieScreen.route){AddMovieScreen(navController,viewModel)}
     }

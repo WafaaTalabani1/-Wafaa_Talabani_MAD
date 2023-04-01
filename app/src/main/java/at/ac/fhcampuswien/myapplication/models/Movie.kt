@@ -12,8 +12,10 @@ data class Movie(
     val actors: String,
     val plot: String,
     val images: List<String>,
+   // val imageResource: Int? = null,
     val rating: Float = 0f,
     var isFavorite: Boolean = false
+
 )
 
 
