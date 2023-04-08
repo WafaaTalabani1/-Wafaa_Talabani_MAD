@@ -29,7 +29,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
 import org.json.JSONObject.NULL
 
-
 @Composable
 fun AddMovieScreen(navController: NavController, viewModel: MovieViewModel){
 
@@ -126,7 +125,8 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 value = title,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { title = it },
+                onValueChange = { title = it
+                                viewModel.validateTitle(title)},
                 label = { Text(text = stringResource(R.string.enter_movie_title)) },
                 isError = !isValidTitle && title.isNotEmpty()
             )
@@ -145,7 +145,8 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 value = year,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { year = it },
+                onValueChange = { year = it
+                                viewModel.validateYear(year)},
                 label = { Text(stringResource(R.string.enter_movie_year)) },
                 isError = !isValidYear && year.isNotEmpty() ,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -195,19 +196,20 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 }
             }
             if (!hasSelectedGenres && genreItems.any { it.isSelected }) {
-            Text(
-                modifier = Modifier.padding(start = 4.dp, top = 4.dp),
-                text = stringResource(R.string.error_no_genres_selected),
-                color = MaterialTheme.colors.error,
-                fontSize = 12.sp
-            )
-        }
+                Text(
+                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                    text = stringResource(R.string.error_no_genres_selected),
+                    color = MaterialTheme.colors.error,
+                    fontSize = 12.sp
+                )
+            }
 
             OutlinedTextField(
                 value = director,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { director = it },
+                onValueChange = { director = it
+                                viewModel.validateDirector(director)},
                 label = { Text(stringResource(R.string.enter_director)) },
                 isError = !isValidDirector && director.isNotEmpty()
             )
@@ -224,7 +226,8 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
             OutlinedTextField(
                 value = actors,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { actors = it },
+                onValueChange = { actors = it
+                                viewModel.validateActors(actors)},
                 label = { Text(stringResource(R.string.enter_actors)) },
                 isError = !isValidActors && actors.isNotEmpty()
             )
@@ -245,7 +248,8 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                onValueChange = { plot = it },
+                onValueChange = { plot = it
+                                viewModel.validatePlot(plot)},
                 label = { Text(textAlign = TextAlign.Start, text = stringResource(R.string.enter_plot)) },
                 isError = !isValidPlot && plot.isNotEmpty()
             )
@@ -267,6 +271,7 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                     if (it.all { char -> char.isDigit() || char == '.' }) {
                         rating = it
                     }
+                    viewModel.validateRating(rating.toFloat())
                 },
                 label = { Text(stringResource(R.string.enter_rating)) },
                 isError = !isValidRating && rating.isNotEmpty()
@@ -306,18 +311,4 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
 
         }}
 }
-
-
-
-    fun addMovie(
-        title: String,
-        year: String,
-        genres: List<Genre>,
-        director: String,
-        actors: String,
-        plot: String,
-        rating: Float
-    ) {
-        // Implement the logic to add a movie to the collection
-    }
 

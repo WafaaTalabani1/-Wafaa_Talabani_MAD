@@ -1,6 +1,5 @@
 package at.ac.fhcampuswien.myapplication
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
