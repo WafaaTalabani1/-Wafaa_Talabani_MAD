@@ -1,11 +1,11 @@
 package at.ac.fhcampuswien.myapplication.screens
 
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,55 +14,52 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import at.ac.fhcampuswien.movieapp.models.Movie
+import at.ac.fhcampuswien.myapplication.viewModels.MovieViewModel
 import at.ac.fhcampuswien.myapplication.R
-import at.ac.fhcampuswien.myapplication.SimpleTopAppBar
+import at.ac.fhcampuswien.myapplication.composables.ErrorMessage
 import at.ac.fhcampuswien.myapplication.models.Genre
 import at.ac.fhcampuswien.myapplication.models.ListItemSelectable
-import at.ac.fhcampuswien.myapplication.models.MovieViewModel
-import java.util.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.sp
-import org.json.JSONObject.NULL
+import at.ac.fhcampuswien.myapplication.models.Movie
+import at.ac.fhcampuswien.myapplication.widgets.SimpleAppBar
 
 @Composable
 fun AddMovieScreen(navController: NavController, viewModel: MovieViewModel){
-
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            SimpleTopAppBar(arrowBackClicked = { navController.popBackStack() }) {
-                Text(text = stringResource(id = R.string.add_movie))
-            }
+            SimpleAppBar(
+                title = stringResource(id = R.string.add_movie),
+                navController = navController)
         },
     ) { padding ->
-        MainContent(Modifier.padding(padding),navController, viewModel)
+        MainContent(
+            Modifier.padding(padding),
+            addButtonClick = { addMovie -> viewModel.addMovie(addMovie)},
+            InputValidationCheck = {Input -> viewModel.validateUserInput(Input)},
+            navController,
+            viewModel)
     }
 }
 
-fun isValidTextInput(input: String): Boolean {
-    return input.all { it.isLetter() || it.isWhitespace() }
-}
-fun isValidNumberInput(input: String): Boolean {
-    return input.all { it.isDigit() }
-}
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MainContent(modifier: Modifier = Modifier,navController: NavController, viewModel: MovieViewModel ) {
-
+fun MainContent(
+    modifier: Modifier = Modifier,
+    addButtonClick: (addMovie: Movie) -> Unit = {},
+    InputValidationCheck: (input: String) -> Boolean,
+    navController: NavController,
+    viewModel: MovieViewModel
+) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
             .padding(10.dp)
     ) {
-
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -70,13 +67,11 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
             horizontalAlignment = Alignment.Start
         ) {
 
-            var title by remember {
-                mutableStateOf("")
-            }
+            var title by remember { mutableStateOf("") }
+            var titleError by remember { mutableStateOf(false) }
 
-            var year by remember {
-                mutableStateOf("")
-            }
+            var year by remember { mutableStateOf("") }
+            var yearError by remember { mutableStateOf(false) }
 
             val genres = Genre.values().toList()
 
@@ -91,76 +86,48 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 )
             }
 
-            var director by remember {
-                mutableStateOf("")
-            }
+            var director by remember { mutableStateOf("") }
+            var directorError by remember { mutableStateOf(false) }
 
-            var actors by remember {
-                mutableStateOf("")
-            }
+            var actors by remember { mutableStateOf("") }
+            var actorError by remember { mutableStateOf(false) }
 
-            var plot by remember {
-                mutableStateOf("")
-            }
+            var plot by remember { mutableStateOf("") }
+            var plotError by remember { mutableStateOf(false) }
 
-            var rating by remember {
-                mutableStateOf("")
-            }
+            var rating by remember { mutableStateOf("") }
+            var ratingError by remember { mutableStateOf(false) }
 
-            val isValidTitle by remember { derivedStateOf { title.isNotBlank() && isValidTextInput(title) } }
-            val isValidYear by remember { derivedStateOf { year.isNotBlank() && isValidNumberInput(year) } }
-            val isValidDirector by remember { derivedStateOf { director.isNotBlank() && isValidTextInput(title)} }
-            val isValidActors by remember { derivedStateOf { actors.isNotBlank() && isValidTextInput(title)} }
-            val isValidRating by remember { derivedStateOf { rating.isNotBlank() && rating.toFloatOrNull() != null } }
-            val hasSelectedGenres by remember { derivedStateOf { genreItems.any { it.isSelected } } }
-            val isValidPlot by remember { derivedStateOf { plot.isNotBlank()&& isValidTextInput(title) } }
-            val isEnabledSaveButton by remember {
-                derivedStateOf {
-                    isValidTitle && isValidYear && isValidDirector &&
-                            isValidActors && isValidRating && hasSelectedGenres
-                }
-            }
+            var enabledSaveButton by remember { mutableStateOf(false) }
 
             OutlinedTextField(
                 value = title,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { title = it
-                                viewModel.validateTitle(title)},
-                label = { Text(text = stringResource(R.string.enter_movie_title)) },
-                isError = !isValidTitle && title.isNotEmpty()
+                onValueChange = {
+                    titleError = !InputValidationCheck(it)
+                    title = it
+                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
+                },
+                label = { Text(text = "Enter Title") },
+                isError = titleError
             )
-
-            if (!isValidTitle && title.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp),
-                    text = stringResource(R.string.error_invalid_title),
-                    color = MaterialTheme.colors.error,
-                    fontSize = 12.sp
-                )
-            }
+            ErrorMessage(msg = "Title", visible = titleError)
 
 
             OutlinedTextField(
                 value = year,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { year = it
-                                viewModel.validateYear(year)},
-                label = { Text(stringResource(R.string.enter_movie_year)) },
-                isError = !isValidYear && year.isNotEmpty() ,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                onValueChange = {
+                    yearError = !InputValidationCheck(it)
+                    year = it
+                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
+                },
+                label = { Text(text = "Enter Year") },
+                isError = yearError
             )
-
-            if (!isValidYear && year.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp),
-                    text = stringResource(R.string.error_invalid_year),
-                    color = MaterialTheme.colors.error,
-                    fontSize = 12.sp
-                )
-            }
-
+            ErrorMessage(msg = "Year", visible = yearError)
 
             Text(
                 modifier = Modifier.padding(top = 4.dp),
@@ -171,8 +138,7 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
             LazyHorizontalGrid(
                 modifier = Modifier.height(100.dp),
                 rows = GridCells.Fixed(3)){
-
-                items(items = genreItems) { genreItem ->
+                items(genreItems) { genreItem ->
                     Chip(
                         modifier = Modifier.padding(2.dp),
                         colors = ChipDefaults.chipColors(
@@ -195,52 +161,33 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                     }
                 }
             }
-            if (!hasSelectedGenres && genreItems.any { it.isSelected }) {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
-                    text = stringResource(R.string.error_no_genres_selected),
-                    color = MaterialTheme.colors.error,
-                    fontSize = 12.sp
-                )
-            }
 
             OutlinedTextField(
                 value = director,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { director = it
-                                viewModel.validateDirector(director)},
-                label = { Text(stringResource(R.string.enter_director)) },
-                isError = !isValidDirector && director.isNotEmpty()
+                onValueChange = {
+                    directorError = !InputValidationCheck(it)
+                    director = it
+                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
+                },
+                label = { Text(text = "Enter Director") },
+                isError = directorError
             )
-
-            if (!isValidDirector && director.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
-                    text = stringResource(R.string.error_invalid_director),
-                    color = MaterialTheme.colors.error,
-                    fontSize = 12.sp
-                )
-            }
+            ErrorMessage(msg = "Director", visible = directorError)
 
             OutlinedTextField(
                 value = actors,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { actors = it
-                                viewModel.validateActors(actors)},
-                label = { Text(stringResource(R.string.enter_actors)) },
-                isError = !isValidActors && actors.isNotEmpty()
+                onValueChange = {
+                    actorError = !InputValidationCheck(it)
+                    actors = it
+                    enabledSaveButton =  enableButton(!titleError, !yearError, !directorError, !actorError, !plotError, !ratingError)
+                },
+                label = { Text(text = "Enter Actor") },
+                isError = actorError
             )
-
-            if (!isValidActors && actors.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
-                    text = stringResource(R.string.error_invalid_actors),
-                    color = MaterialTheme.colors.error,
-                    fontSize = 12.sp
-                )
-            }
-
+            ErrorMessage(msg = "Actor", visible = actorError)
 
             OutlinedTextField(
                 value = plot,
@@ -248,46 +195,37 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                onValueChange = { plot = it
-                                viewModel.validatePlot(plot)},
-                label = { Text(textAlign = TextAlign.Start, text = stringResource(R.string.enter_plot)) },
-                isError = !isValidPlot && plot.isNotEmpty()
+                onValueChange = {
+                    plotError = !InputValidationCheck(it)
+                    plot = it
+                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
+                },
+                label = { Text(textAlign = TextAlign.Start, text = "Enter Plot") },
+                isError = plotError
             )
-
-            if (!isValidPlot && plot.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
-                    text = stringResource(R.string.error_invalid_plot),
-                    color = MaterialTheme.colors.error,
-                    fontSize = 12.sp
-                )
-            }
+            ErrorMessage(msg = "Plot", visible = plotError)
 
             OutlinedTextField(
                 value = rating,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = {
-                    if (it.all { char -> char.isDigit() || char == '.' }) {
-                        rating = it
+                    ratingError = !InputValidationCheck(it)
+                    rating = if(it.startsWith("0")) {
+                        ""
+                    } else {
+                        it
                     }
-                    viewModel.validateRating(rating.toFloat())
+                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
                 },
-                label = { Text(stringResource(R.string.enter_rating)) },
-                isError = !isValidRating && rating.isNotEmpty()
+                label = { Text(text = "Enter Rating") },
+                isError = ratingError
             )
+            ErrorMessage(msg = "Rating", visible = ratingError)
 
-            if (!isValidRating && rating.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp, top = 4.dp),
-                    text = stringResource(R.string.error_invalid_rating),
-                    color = MaterialTheme.colors.error,
-                    fontSize = 12.sp
-                )
-            }
 
             Button(
-                enabled = isEnabledSaveButton,
+                enabled = enabledSaveButton,
                 onClick = {
                     val selectedGenres = genreItems.filter { it.isSelected }.map { Genre.valueOf(it.title) }
                     val newMovie = Movie(
@@ -300,15 +238,20 @@ fun MainContent(modifier: Modifier = Modifier,navController: NavController, view
                         plot = plot,
                         images = listOf("","",""),
                         rating = rating.toFloat(),
-                        isFavorite = false // Set the initial favorite status to false
+                        favoriteAsDefault = false // Set the initial favorite status to false
                     )
                     viewModel.addMovie(newMovie)
                     navController.popBackStack() // Navigate back to the previous screen
+
                 }
             ) {
                 Text(text = stringResource(R.string.add))
             }
-
-        }}
+        }
+    }
 }
 
+
+fun enableButton(titleValid: Boolean, yearValid: Boolean, directorValid: Boolean, actorValid: Boolean, plotValid: Boolean, ratingValid: Boolean): Boolean {
+    return titleValid && yearValid && directorValid && actorValid && plotValid && ratingValid
+}

@@ -1,9 +1,11 @@
-package at.ac.fhcampuswien.movieapp.models
+package at.ac.fhcampuswien.myapplication.models
 
-import at.ac.fhcampuswien.myapplication.models.Genre
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 
-data class Movie(
+class Movie(
     val id: String,
     val title: String,
     val year: String,
@@ -11,14 +13,12 @@ data class Movie(
     val director: String,
     val actors: String,
     val plot: String,
-    val images: List<String>,
-   // val imageResource: Int? = null,
-    val rating: Float = 0f,
-    var isFavorite: Boolean = false
-
-)
-
-
+    val images: List<String>? = null,
+    val rating: Float = 0F,
+    favoriteAsDefault: Boolean = false
+    ){
+    var isFavorite by mutableStateOf(favoriteAsDefault)
+}
 
 fun getMovies(): List<Movie> {
     return listOf(
@@ -34,8 +34,7 @@ fun getMovies(): List<Movie> {
                 "https://images-na.ssl-images-amazon.com/images/M/MV5BMTY2ODQ3NjMyMl5BMl5BanBnXkFtZTcwODg0MTUzNA@@._V1_SX1777_CR0,0,1777,999_AL_.jpg",
                 "https://images-na.ssl-images-amazon.com/images/M/MV5BMTMxOTEwNDcxN15BMl5BanBnXkFtZTcwOTg0MTUzNA@@._V1_SX1777_CR0,0,1777,999_AL_.jpg",
                 "https://images-na.ssl-images-amazon.com/images/M/MV5BMTYxMDg1Nzk1MV5BMl5BanBnXkFtZTcwMDk0MTUzNA@@._V1_SX1500_CR0,0,1500,999_AL_.jpg"),
-            rating = 7.9f
-        ),
+            rating = 7.9f,),
 
         Movie(id = "tt0416449",
             title = "300",
@@ -48,8 +47,7 @@ fun getMovies(): List<Movie> {
                 "https://images-na.ssl-images-amazon.com/images/M/MV5BMTQwNTgyNTMzNF5BMl5BanBnXkFtZTcwNDA2NTIyMw@@._V1_SX1777_CR0,0,1777,935_AL_.jpg",
                 "https://images-na.ssl-images-amazon.com/images/M/MV5BMTc0MjQzOTEwMV5BMl5BanBnXkFtZTcwMzE2NTIyMw@@._V1_SX1777_CR0,0,1777,947_AL_.jpg"
             ),
-            rating = 7.7f
-        ),
+            rating = 7.7f),
 
         Movie(id = "tt0848228",
             title = "The Avengers",
@@ -68,7 +66,7 @@ fun getMovies(): List<Movie> {
         Movie(id = "tt0993846",
             title = "The Wolf of Wall Street",
             year = "2013",
-            genre = listOf(Genre.BIOGRAPHY, Genre.COMEDY, Genre.COMEDY),
+            genre = listOf(Genre.BIOGRAPHY, Genre.COMEDY, Genre.CRIME),
             director = "Martin Scorsese",
             actors = "Leonardo DiCaprio, Jonah Hill, Margot Robbie, Matthew McConaughey",
             plot = "Based on the true story of Jordan Belfort, from his rise to a wealthy stock-broker living the high life to his fall involving crime, corruption and the federal government.",
@@ -92,10 +90,11 @@ fun getMovies(): List<Movie> {
                 "https://images-na.ssl-images-amazon.com/images/M/MV5BMzE3MTM0MTc3Ml5BMl5BanBnXkFtZTgwMDIyODgxMzE@._V1_SX1500_CR0,0,1500,999_AL_.jpg",
                 "https://images-na.ssl-images-amazon.com/images/M/MV5BNjYzNjE2NDk3N15BMl5BanBnXkFtZTgwNzEyODgxMzE@._V1_SX1500_CR0,0,1500,999_AL_.jpg"),
             rating = 8.6f),
+
         Movie(id = "tt0944947",
             title = "Game of Thrones",
             year = "2011 - 2018",
-            genre = listOf(Genre.ADVENTURE, Genre.DRAMA, Genre.FANTASY) ,
+            genre = listOf(Genre.ADVENTURE, Genre.DRAMA, Genre.FANTASY),
             director = "N/A",
             actors = "Peter Dinklage, Lena Headey, Emilia Clarke, Kit Harington",
             plot = "While a civil war brews between several noble families in Westeros, the children of the former rulers of the land attempt to rise up to power. Meanwhile a forgotten race, bent on destruction, plans to return after thousands of years in the North.",
