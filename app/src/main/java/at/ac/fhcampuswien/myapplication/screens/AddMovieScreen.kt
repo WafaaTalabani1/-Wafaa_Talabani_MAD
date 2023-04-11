@@ -1,10 +1,12 @@
 package at.ac.fhcampuswien.myapplication.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -12,13 +14,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import at.ac.fhcampuswien.myapplication.viewModels.MovieViewModel
 import at.ac.fhcampuswien.myapplication.R
-import at.ac.fhcampuswien.myapplication.composables.ErrorMessage
+import at.ac.fhcampuswien.myapplication.composables.RequiredFieldErrorMessage
+import at.ac.fhcampuswien.myapplication.composables.notValidGenreMessage
+import at.ac.fhcampuswien.myapplication.composables.notValidMessage
 import at.ac.fhcampuswien.myapplication.models.Genre
 import at.ac.fhcampuswien.myapplication.models.ListItemSelectable
 import at.ac.fhcampuswien.myapplication.models.Movie
@@ -43,6 +47,14 @@ fun AddMovieScreen(navController: NavController, viewModel: MovieViewModel){
             navController,
             viewModel)
     }
+}
+
+
+fun isValidTextInput(input: String): Boolean {
+    return input.all { it.isLetter() || it.isWhitespace() }
+}
+fun isValidNumberInput(input: String): Boolean {
+    return input.all { it.isDigit() }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -85,6 +97,8 @@ fun MainContent(
                     }
                 )
             }
+            var genresError by remember { mutableStateOf(false) }
+
 
             var director by remember { mutableStateOf("") }
             var directorError by remember { mutableStateOf(false) }
@@ -100,6 +114,21 @@ fun MainContent(
 
             var enabledSaveButton by remember { mutableStateOf(false) }
 
+            val isValidTitle by remember { derivedStateOf { title.isNotBlank() && isValidTextInput(title) } }
+            val isValidYear by remember { derivedStateOf { year.isNotBlank() && isValidNumberInput(year) } }
+            val isValidDirector by remember { derivedStateOf { director.isNotBlank() && isValidTextInput(director)} }
+            val isValidActors by remember { derivedStateOf { actors.isNotBlank() && isValidTextInput(actors)} }
+            val isValidRating by remember { derivedStateOf { rating.isNotBlank() && rating.toFloatOrNull() != null } }
+            val hasSelectedGenres by remember { derivedStateOf { genreItems.any { it.isSelected } } }
+            val isValidPlot by remember { derivedStateOf { plot.isNotBlank()&& isValidTextInput(plot) } }
+            val isEnabledSaveButton by remember {
+                derivedStateOf {
+                    isValidTitle && isValidYear && isValidDirector &&
+                            isValidActors && isValidRating && hasSelectedGenres
+                }
+            }
+
+
             OutlinedTextField(
                 value = title,
                 singleLine = true,
@@ -107,12 +136,18 @@ fun MainContent(
                 onValueChange = {
                     titleError = !InputValidationCheck(it)
                     title = it
-                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
                 },
                 label = { Text(text = "Enter Title") },
-                isError = titleError
+                isError = !isValidTitle && title.isNotEmpty()
             )
-            ErrorMessage(msg = "Title", visible = titleError)
+
+            if (!isValidTitle && title.isNotEmpty()) {
+                notValidMessage(msg = "Title")
+            }
+            RequiredFieldErrorMessage(msg = "Title", visible = titleError)
+
+
+
 
 
             OutlinedTextField(
@@ -122,12 +157,17 @@ fun MainContent(
                 onValueChange = {
                     yearError = !InputValidationCheck(it)
                     year = it
-                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
-                },
+                         },
                 label = { Text(text = "Enter Year") },
-                isError = yearError
+                isError = !isValidYear && year.isNotEmpty() ,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
-            ErrorMessage(msg = "Year", visible = yearError)
+            if (!isValidYear && year.isNotEmpty()) {
+                notValidMessage(msg = "Year")
+            }
+            RequiredFieldErrorMessage(msg = "Year", visible = yearError)
+
+
 
             Text(
                 modifier = Modifier.padding(top = 4.dp),
@@ -161,6 +201,10 @@ fun MainContent(
                     }
                 }
             }
+            if (!hasSelectedGenres && genreItems.any { it.isSelected }) {
+                notValidGenreMessage(msg = "Genre")
+            }
+            RequiredFieldErrorMessage(msg = "Genre", visible = genresError)
 
             OutlinedTextField(
                 value = director,
@@ -169,12 +213,15 @@ fun MainContent(
                 onValueChange = {
                     directorError = !InputValidationCheck(it)
                     director = it
-                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
-                },
+                      },
                 label = { Text(text = "Enter Director") },
-                isError = directorError
+                isError = !isValidDirector && director.isNotEmpty()
             )
-            ErrorMessage(msg = "Director", visible = directorError)
+            if (!isValidDirector && director.isNotEmpty()) {
+                notValidMessage(msg = "Director")
+            }
+            RequiredFieldErrorMessage(msg = "Director", visible = directorError)
+
 
             OutlinedTextField(
                 value = actors,
@@ -182,12 +229,16 @@ fun MainContent(
                 onValueChange = {
                     actorError = !InputValidationCheck(it)
                     actors = it
-                    enabledSaveButton =  enableButton(!titleError, !yearError, !directorError, !actorError, !plotError, !ratingError)
-                },
+                       },
                 label = { Text(text = "Enter Actor") },
-                isError = actorError
+                isError = !isValidActors && actors.isNotEmpty()
             )
-            ErrorMessage(msg = "Actor", visible = actorError)
+            if (!isValidActors && actors.isNotEmpty()) {
+                notValidMessage(msg = "Actor")
+            }
+            RequiredFieldErrorMessage(msg = "Actor", visible = actorError)
+
+
 
             OutlinedTextField(
                 value = plot,
@@ -198,12 +249,13 @@ fun MainContent(
                 onValueChange = {
                     plotError = !InputValidationCheck(it)
                     plot = it
-                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
-                },
+                       },
                 label = { Text(textAlign = TextAlign.Start, text = "Enter Plot") },
-                isError = plotError
+                isError = false
             )
-            ErrorMessage(msg = "Plot", visible = plotError)
+
+
+
 
             OutlinedTextField(
                 value = rating,
@@ -215,17 +267,19 @@ fun MainContent(
                         ""
                     } else {
                         it
-                    }
-                    enabledSaveButton =  enableButton(titleError, yearError, directorError, actorError, plotError, ratingError)
-                },
+                    } },
                 label = { Text(text = "Enter Rating") },
-                isError = ratingError
+                isError = !isValidRating && rating.isNotEmpty()
             )
-            ErrorMessage(msg = "Rating", visible = ratingError)
+            if (!isValidRating && rating.isNotEmpty()) {
+                notValidMessage(msg = "Rating")
+            }
+            RequiredFieldErrorMessage(msg = "Rating", visible = ratingError)
+
 
 
             Button(
-                enabled = enabledSaveButton,
+                enabled = isEnabledSaveButton,
                 onClick = {
                     val selectedGenres = genreItems.filter { it.isSelected }.map { Genre.valueOf(it.title) }
                     val newMovie = Movie(
@@ -250,6 +304,8 @@ fun MainContent(
         }
     }
 }
+
+
 
 
 fun enableButton(titleValid: Boolean, yearValid: Boolean, directorValid: Boolean, actorValid: Boolean, plotValid: Boolean, ratingValid: Boolean): Boolean {
