@@ -16,8 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import at.ac.fhcampuswien.movieapp.models.Movie
-import at.ac.fhcampuswien.myapplication.MovieRow
-import at.ac.fhcampuswien.myapplication.SimpleAppBar
+
 
 @Composable
 fun FavoritesScreen(navController : NavController){

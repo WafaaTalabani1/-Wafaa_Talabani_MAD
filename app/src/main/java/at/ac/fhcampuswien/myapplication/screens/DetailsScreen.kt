@@ -26,10 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import at.ac.fhcampuswien.movieapp.models.Movie
-import at.ac.fhcampuswien.movieapp.models.getMovies
-import at.ac.fhcampuswien.myapplication.MovieRow
-import at.ac.fhcampuswien.myapplication.MyNavigation
-import at.ac.fhcampuswien.myapplication.SimpleAppBar
+
 import coil.compose.rememberAsyncImagePainter
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 

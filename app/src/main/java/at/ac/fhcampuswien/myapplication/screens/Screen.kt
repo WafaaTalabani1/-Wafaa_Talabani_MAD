@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.myapplication
+package at.ac.fhcampuswien.myapplication.screens
 
 sealed class Screen(val route: String)
 object HomeScreen:  Screen("home")

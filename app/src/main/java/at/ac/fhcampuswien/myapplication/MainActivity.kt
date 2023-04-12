@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import at.ac.fhcampuswien.movieapp.models.Movie
 import at.ac.fhcampuswien.movieapp.models.getMovies
+import at.ac.fhcampuswien.myapplication.navigation.MyNavigation
 import at.ac.fhcampuswien.myapplication.ui.theme.MyApplicationTheme
 
 import coil.compose.rememberAsyncImagePainter

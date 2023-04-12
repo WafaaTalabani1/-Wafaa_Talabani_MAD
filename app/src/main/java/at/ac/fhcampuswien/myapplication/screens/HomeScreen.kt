@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.myapplication
+package at.ac.fhcampuswien.myapplication.screens
 
 import android.service.autofill.OnClickAction
 import android.util.Log
