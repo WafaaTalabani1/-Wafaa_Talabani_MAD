@@ -51,3 +51,4 @@ fun DetailScreen(navController: NavController, movieId: Int?){
         }
     }
 }
+
