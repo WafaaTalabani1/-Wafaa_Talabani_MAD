@@ -1,6 +1,5 @@
 package at.ac.fhcampuswien.myapplication.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
@@ -12,13 +11,15 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import at.ac.fhcampuswien.myapplication.viewModels.MovieViewModel
+import at.ac.fhcampuswien.myapplication.utils.InjectorUtils
 import at.ac.fhcampuswien.myapplication.R
 import at.ac.fhcampuswien.myapplication.composables.RequiredFieldErrorMessage
 import at.ac.fhcampuswien.myapplication.composables.notValidGenreMessage
@@ -26,11 +27,17 @@ import at.ac.fhcampuswien.myapplication.composables.notValidMessage
 import at.ac.fhcampuswien.myapplication.models.Genre
 import at.ac.fhcampuswien.myapplication.models.ListItemSelectable
 import at.ac.fhcampuswien.myapplication.models.Movie
+import at.ac.fhcampuswien.myapplication.viewModels.AddMovieViewModel
 import at.ac.fhcampuswien.myapplication.widgets.SimpleAppBar
+import kotlinx.coroutines.launch
 
 @Composable
-fun AddMovieScreen(navController: NavController, viewModel: MovieViewModel){
+fun AddMovieScreen(navController: NavController){
     val scaffoldState = rememberScaffoldState()
+    val viewModel: AddMovieViewModel = viewModel(factory = InjectorUtils.provideMovieViewModelFactory(
+        LocalContext.current))
+    val coroutinescope = rememberCoroutineScope()
+
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -42,8 +49,11 @@ fun AddMovieScreen(navController: NavController, viewModel: MovieViewModel){
     ) { padding ->
         MainContent(
             Modifier.padding(padding),
-            addButtonClick = { addMovie -> viewModel.addMovie(addMovie)},
-            InputValidationCheck = {Input -> viewModel.validateUserInput(Input)},
+            addButtonClick = { addMovie -> coroutinescope.launch {
+                viewModel.addMovie(addMovie)
+            }},
+            InputValidationCheck = {Input ->
+                viewModel.validateUserInput(Input)},
             navController,
             viewModel)
     }
@@ -64,7 +74,7 @@ fun MainContent(
     addButtonClick: (addMovie: Movie) -> Unit = {},
     InputValidationCheck: (input: String) -> Boolean,
     navController: NavController,
-    viewModel: MovieViewModel
+    viewModel: AddMovieViewModel
 ) {
     Surface(
         modifier = modifier
@@ -277,13 +287,12 @@ fun MainContent(
             RequiredFieldErrorMessage(msg = "Rating", visible = ratingError)
 
 
-
+            val coroutinescope = rememberCoroutineScope()
             Button(
                 enabled = isEnabledSaveButton,
                 onClick = {
                     val selectedGenres = genreItems.filter { it.isSelected }.map { Genre.valueOf(it.title) }
                     val newMovie = Movie(
-                        id = viewModel.nextMovieId.toString(), // Generate a unique ID for the movie
                         title = title,
                         year = year,
                         genre = selectedGenres,
@@ -292,9 +301,11 @@ fun MainContent(
                         plot = plot,
                         images = listOf("","",""),
                         rating = rating.toFloat(),
-                        favoriteAsDefault = false // Set the initial favorite status to false
+                        isFavorite = false // Set the initial favorite status to false
                     )
-                    viewModel.addMovie(newMovie)
+
+                coroutinescope.launch {
+                    viewModel.addMovie(newMovie)}
                     navController.popBackStack() // Navigate back to the previous screen
 
                 }

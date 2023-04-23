@@ -6,14 +6,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import at.ac.fhcampuswien.myapplication.utils.InjectorUtils
 import at.ac.fhcampuswien.myapplication.models.Screen
-import at.ac.fhcampuswien.myapplication.viewModels.MovieViewModel
+import at.ac.fhcampuswien.myapplication.viewModels.HomeViewModel
 import at.ac.fhcampuswien.myapplication.widgets.HomeAppBar
 import at.ac.fhcampuswien.myapplication.widgets.MovieRow
+import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
+fun HomeScreen(navController: NavController) {
+    val coroutineScope = rememberCoroutineScope()
+    val homeViewModel: HomeViewModel =
+        viewModel(factory= InjectorUtils.provideMovieViewModelFactory(LocalContext.current))
+    val allMovieList by homeViewModel.movie.collectAsState()
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
@@ -24,12 +33,16 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
                 onDropDownFavorite = { navController.navigate(Screen.FavoritesScreen.route) }
             )
             LazyColumn (userScrollEnabled = true) {
-                items(viewModel.movieList) { movie ->
+                items(allMovieList) { movie ->
                     MovieRow(
                         movie = movie,
                         onItemClick = { movieId ->
                             navController.navigate(Screen.DetailsScreen.route + "/$movieId") },
-                        onFavoriteClick = { viewModel.toggleFavorite(it) }
+                        onFavoriteClick = {
+                            coroutineScope.launch {
+                                homeViewModel.toggleFavorite(it)
+                            }
+                        }
                     )
                 }
             }
