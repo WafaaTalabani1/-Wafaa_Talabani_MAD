@@ -19,12 +19,12 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun DetailScreen(navController: NavController, movieId: Int?){
+fun DetailScreen(navController: NavController, movie: Movie){
     val viewModel: DetailsViewModel = viewModel(factory = InjectorUtils.provideMovieViewModelFactory(
         LocalContext.current))
     val movieListState by viewModel.movieListState.collectAsState()
     val coroutinescope = rememberCoroutineScope()
-    val movie: Movie? = movieId?.let { movieListState.get(it) }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background) {

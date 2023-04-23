@@ -9,7 +9,7 @@ import at.ac.fhcampuswien.myapplication.utils.StringListConverter
 @Entity
  class Movie(
     @PrimaryKey(autoGenerate = true)
-    var id: Long = 0,
+    var id: Int = 0,
     var title: String,
     var year: String,
     @TypeConverters(GenreListConverter::class)

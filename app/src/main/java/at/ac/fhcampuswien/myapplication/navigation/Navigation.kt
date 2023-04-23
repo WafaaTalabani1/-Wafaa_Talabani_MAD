@@ -6,7 +6,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import at.ac.fhcampuswien.myapplication.models.Movie
 import at.ac.fhcampuswien.myapplication.models.Screen
+import at.ac.fhcampuswien.myapplication.models.getMovies
 import at.ac.fhcampuswien.myapplication.screens.AddMovieScreen
 import at.ac.fhcampuswien.myapplication.screens.DetailScreen
 import at.ac.fhcampuswien.myapplication.screens.FavoritesScreen
@@ -32,7 +34,8 @@ fun Navigation (){
         ){ backStackEntry ->
             DetailScreen(
                 navController = navController,
-                movieId = backStackEntry.arguments?.getInt("movieId")
+                movie = getMovies().get(1)
+                //movieId = backStackEntry.arguments?.getInt("movieId")
             )
         }
 
